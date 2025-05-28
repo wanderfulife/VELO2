@@ -55,6 +55,7 @@ import { ref, onMounted } from "vue";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import * as XLSX from "xlsx";
+import { idfMobilitesCycleSurveyQuestions } from "./idfMobilitesCycleSurveyQuestions.js";
 
 const props = defineProps({
   activeFirebaseCollectionName: {
@@ -122,24 +123,39 @@ const downloadData = async () => {
     ];
 
     // Define keys to be completely excluded from the export
-    const excludedKeys = ["firestore_id", "firebase_timestamp"];
+    const excludedKeys = ["firestore_id", "firebase_timestamp", "S1"];
 
-    // Dynamically generate the full header order
+    // Get the survey question order from the IDF survey questions
+    const surveyQuestionOrder = idfMobilitesCycleSurveyQuestions.map(q => q.id);
+    
+    // Collect all keys that exist in the data
     let allKeys = new Set(coreHeaders);
     rawData.forEach(docData => {
       Object.keys(docData).forEach(key => {
-        if (!excludedKeys.includes(key)) { // Only add if not excluded
+        if (!excludedKeys.includes(key)) {
           allKeys.add(key);
         }
       });
     });
 
-    // Ensure core headers are first, then sort the rest alphabetically for consistency
-    // Filter out any excludedKeys that might have ended up in allKeys if they were also in coreHeaders initially (though they are not now)
-    const dynamicHeaders = Array.from(allKeys)
-                                .filter(key => !coreHeaders.includes(key) && !excludedKeys.includes(key))
-                                .sort();
-    const headerOrder = [...coreHeaders, ...dynamicHeaders];
+    // Create ordered headers: core headers first, then survey questions in order, then any remaining keys
+    const surveyHeaders = surveyQuestionOrder.filter(questionId => 
+      allKeys.has(questionId) && 
+      !coreHeaders.includes(questionId)
+    );
+    
+    const remainingHeaders = Array.from(allKeys)
+      .filter(key => 
+        !coreHeaders.includes(key) && 
+        !surveyQuestionOrder.includes(key) && 
+        !excludedKeys.includes(key)
+      )
+      .sort(); // Sort remaining headers alphabetically
+    
+    // Rename POSTE_TRAVAIL to POSTE in the header order
+    const headerOrder = [...coreHeaders, ...surveyHeaders, ...remainingHeaders].map(header => 
+      header === "POSTE_TRAVAIL" ? "POSTE" : header
+    );
 
     const data = rawData.map((docData) => {
       const processedData = {};
@@ -147,7 +163,9 @@ const downloadData = async () => {
       for (const header of headerOrder) {
         // Double check not to include excluded keys, though headerOrder should already be filtered
         if (!excludedKeys.includes(header)) {
-            let value = docData[header] !== undefined ? docData[header] : "";
+            // Map POSTE back to POSTE_TRAVAIL for data lookup
+            const dataKey = header === "POSTE" ? "POSTE_TRAVAIL" : header;
+            let value = docData[dataKey] !== undefined ? docData[dataKey] : "";
             
             // Handle arrays (from multiple choice questions) by converting to comma-separated string
             if (Array.isArray(value)) {
