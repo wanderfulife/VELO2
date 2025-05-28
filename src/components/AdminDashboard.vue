@@ -215,24 +215,29 @@ onMounted(() => {
 }
 
 .btn-signin {
-  background-color: #4caf50;
-  color: #ffffff;
+  background-color: transparent;
+  color: #4a5568;
   border: none;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 12px 24px;
-  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 300;
+  padding: 4px 8px;
+  border-radius: 0;
   transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  text-transform: lowercase;
+  letter-spacing: 0;
   box-shadow: none;
   margin: 0;
   outline: none;
+  opacity: 0.5;
+  text-decoration: none;
 }
 
 .btn-signin:hover {
-  background-color: #45a049;
+  background-color: transparent;
+  color: #718096;
+  opacity: 0.8;
+  text-decoration: none;
   box-shadow: none;
 }
 
