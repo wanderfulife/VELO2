@@ -318,76 +318,97 @@ onMounted(() => {
 
 /* Override modal-content when it's also admin-dashboard */
 .modal-content.admin-dashboard {
-  padding: 10px !important; /* Force smaller padding */
-  min-width: 400px !important;
-  max-width: 450px !important;
+  padding: 15px !important; /* Slightly more padding for readability */
+  min-width: 280px !important;
+  max-width: 350px !important; /* Smaller max width for mobile */
+  width: 90vw !important; /* Responsive width */
   height: auto !important; /* Force auto height */
   min-height: auto !important; /* Force auto min height */
 }
 
 .modal-content.admin-dashboard h2 {
-  margin: 0 0 8px 0 !important; /* Force smaller margin */
-  font-size: 16px !important; /* Force smaller title */
+  margin: 0 0 12px 0 !important; /* Slightly more margin */
+  font-size: 18px !important; /* Slightly larger title */
 }
 
 .modal-content.admin-dashboard .dashboard-content {
-  gap: 4px !important; /* Force tiny gap */
-  margin-bottom: 4px !important; /* Force tiny margin */
+  gap: 8px !important; /* Slightly more gap */
+  margin-bottom: 8px !important; /* Slightly more margin */
 }
 
 .modal-content.admin-dashboard .dashboard-card {
-  padding: 6px !important; /* Force tiny padding */
+  padding: 10px !important; /* Slightly more padding */
   margin: 0 !important; /* Force no margin */
 }
 
 .modal-content.admin-dashboard .dashboard-card h3 {
-  margin: 0 0 2px 0 !important; /* Force tiny margin */
-  font-size: 12px !important; /* Force smaller font */
+  margin: 0 0 4px 0 !important; /* Slightly more margin */
+  font-size: 14px !important; /* Slightly larger font */
 }
 
 .modal-content.admin-dashboard .big-number {
-  font-size: 20px !important; /* Force smaller number */
+  font-size: 24px !important; /* Slightly larger number */
   margin: 0 !important; /* Force no margin */
 }
 
 .modal-content.admin-dashboard .btn-download {
-  margin-top: 4px !important; /* Force tiny margin */
-  padding: 8px !important; /* Force tiny padding */
-  font-size: 12px !important; /* Force tiny font */
+  margin-top: 8px !important; /* Slightly more margin */
+  padding: 10px !important; /* Slightly more padding */
+  font-size: 14px !important; /* Slightly larger font */
+}
+
+.modal-content.admin-dashboard .dashboard-card ul {
+  max-height: 150px !important; /* Smaller max height for mobile */
+}
+
+.modal-content.admin-dashboard .dashboard-card li {
+  padding: 8px 0 !important; /* Slightly more padding */
+  font-size: 14px !important; /* Ensure readable font size */
 }
 
 /* Force signin modal to be compact */
 .modal-content.signin-modal {
   padding: 15px !important;
   width: auto !important;
-  min-width: 280px !important;
-  max-width: 280px !important;
+  min-width: 300px !important;
+  max-width: 320px !important;
   height: auto !important;
   min-height: auto !important;
 }
 
 .signin-modal {
-  max-width: 280px !important; /* Force smaller width */
-  padding: 0 !important; /* Remove all padding since modal-content has it */
+  max-width: 320px !important;
+  padding: 0 !important;
 }
 
 .signin-modal h2 {
-  margin: 0 0 10px 0 !important; /* Force tiny margin */
-  font-size: 16px !important; /* Force smaller title */
+  margin: 0 0 15px 0 !important;
+  font-size: 18px !important;
   text-align: center;
   font-weight: normal;
 }
 
+.signin-modal .form-control,
+.signin-modal .btn-signin {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 .signin-modal .form-control {
-  width: 100%;
-  margin-bottom: 8px !important; /* Force tiny margin */
+  margin-bottom: 15px !important;
   background-color: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
-  padding: 8px !important; /* Force tiny padding */
-  font-size: 14px;
-  border-radius: 6px !important; /* Smaller radius */
-  box-sizing: border-box;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  border-radius: 8px !important;
+  height: 48px !important;
+  display: flex;
+  align-items: center;
 }
 
 .signin-modal .form-control::placeholder {
@@ -395,21 +416,23 @@ onMounted(() => {
 }
 
 .signin-modal .btn-signin {
-  width: 100%;
   margin: 0 !important;
-  padding: 8px !important; /* Force tiny padding */
-  background: linear-gradient(135deg, #68d391 0%, #4fd1c7 100%) !important; /* Beautiful gradient */
+  padding: 12px 16px !important;
+  background: linear-gradient(135deg, #68d391 0%, #4fd1c7 100%) !important;
   color: white !important;
   border: none !important;
-  border-radius: 6px !important; /* Smaller radius */
-  font-size: 12px !important; /* Force smaller font */
-  font-weight: 600 !important; /* Semi-bold */
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.3s ease !important;
-  box-sizing: border-box;
-  box-shadow: 0 3px 8px rgba(104, 211, 145, 0.3) !important; /* Smaller shadow */
-  letter-spacing: 0.5px !important; /* Slight letter spacing */
+  height: 48px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(104, 211, 145, 0.3) !important;
+  letter-spacing: 0.5px !important;
 }
 
 .signin-modal .btn-signin:hover {

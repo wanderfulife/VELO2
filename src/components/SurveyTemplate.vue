@@ -453,9 +453,11 @@ const startSurveyActual = () => {
     questionPath.value = [currentQuestion.value.id];
     currentStep.value = 'survey';
     
-    // Scroll to top for survey start
+    // Scroll to top when starting survey, with delay to prevent conflicts
     nextTick(() => {
-      window.scrollTo(0, 0);
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }, 50);
     });
   } else if (firstQuestionId === 'end'){
     finishSurvey();
@@ -677,9 +679,11 @@ const nextQuestion = async (selectedOption = null) => {
       selectedGareName.value = "";
       currentQuestionIndex.value = props.surveyQuestions.findIndex(q => q.id === nextQObject.id);
       
-      // Scroll to top for each new question
+      // Scroll to top for new question after DOM updates, with a small delay to prevent conflicts
       nextTick(() => {
-        window.scrollTo(0, 0);
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }, 50);
       });
     } else {
       console.error(`CRITICAL ERROR: Next question with ID '${nextId}' not found.`);
@@ -709,9 +713,11 @@ const previousQuestion = () => {
     streetInput.value = "";
     selectedGareName.value = "";
     
-    // Scroll to top when going back to previous question
+    // Scroll to top when going back to previous question, with delay to prevent conflicts
     nextTick(() => {
-      window.scrollTo(0, 0);
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }, 50);
     });
   } else {
       console.error("Error going back: Could not find previous question ID in path or props:", previousQuestionIdStr);
