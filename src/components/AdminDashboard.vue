@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="admin-dashboard-root">
     <button class="btn-signin" @click="showSignInModal = true">
       Connexion Admin
     </button>
@@ -206,6 +206,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.admin-dashboard-root {
+  background-color: #2a3b63;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+}
+
 .btn-signin {
   background-color: #4caf50;
   color: #ffffff;
@@ -218,13 +226,14 @@ onMounted(() => {
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  box-shadow: none;
+  margin: 0;
+  outline: none;
 }
 
 .btn-signin:hover {
   background-color: #45a049;
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
 }
 
 /* Keep the rest of the styles unchanged */

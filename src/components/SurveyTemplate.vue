@@ -1107,7 +1107,7 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 20px 20px 0 20px; /* Remove bottom padding that creates the line */
   width: 100%;
   max-width: 700px;
   margin: 0 auto;
@@ -1300,7 +1300,7 @@ html, body {
   max-width: 25%; 
   height: auto;
   margin-top: 40px; 
-  margin-bottom: 20px; 
+  margin-bottom: 0; /* Remove the margin that was creating the line */
 }
 
 .progress-bar {

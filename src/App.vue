@@ -12,7 +12,7 @@ const masterFirebaseCollectionName = ref("IDFMobilites2");
     <div class="survey-content-area">
       <Constructor :firebase-collection-override="masterFirebaseCollectionName" />
     </div>
-    <div class="admin-footer-area">
+    <div class="admin-section">
       <AdminDashboard :active-firebase-collection-name="masterFirebaseCollectionName" />
     </div>
   </div>
@@ -42,17 +42,18 @@ html, body {
   /* align-items: flex-start; */ 
 }
 
-.admin-footer-area {
-  padding: 15px 0; /* Add some padding around the button */
+.admin-section {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #1e2a4a; /* Footer background, can be same as survey or different */
-  width: 100%;
+  background-color: #2a3b63; /* Same as main background */
+  padding: 20px 0; /* Some padding for spacing */
+  margin: 0;
+  border: none;
 }
 
 /* Reset/override specific styles for AdminDashboard's button if needed */
-.admin-footer-area .btn-signin {
+.btn-signin {
   /* Styles from AdminDashboard.vue might be fine, or adjust here */
   /* e.g., margin: 0; to ensure it's centered by flex container */
    margin-bottom: 0; /* Remove default margin if any from component */
