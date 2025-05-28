@@ -235,7 +235,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { db } from "../firebaseConfig";
 import {
   collection,
@@ -398,6 +398,9 @@ const setEnqueteur = () => {
 };
 
 const startSurveyActual = () => {
+  // Preserve current scroll position
+  const currentScrollY = window.scrollY;
+  
   const now = new Date();
   startDate.value = now.toLocaleTimeString("fr-FR", {
     hour: "2-digit",
@@ -452,6 +455,11 @@ const startSurveyActual = () => {
   if (currentQuestion.value) {
     questionPath.value = [currentQuestion.value.id];
     currentStep.value = 'survey';
+    
+    // Restore scroll position after DOM update
+    nextTick(() => {
+      window.scrollTo(0, currentScrollY);
+    });
   } else if (firstQuestionId === 'end'){
     finishSurvey();
   } else {
@@ -603,41 +611,6 @@ const handleGareInput = () => {
     selectedGareName.value.trim()
   );
   nextQuestion(null);
-};
-
-const advanceToNextByIndexOrEnd = async () => {
-    if (!currentQuestion.value) {
-        console.error("advanceToNextByIndexOrEnd called with no current question.");
-        await finishSurvey();
-        return;
-    }
-    const localCurrentIndex = props.surveyQuestions.findIndex(q => q.id === currentQuestion.value.id);
-    if (localCurrentIndex === -1) {
-      console.error("Could not find current question in surveyQuestions array for advancing by index.");
-      await finishSurvey();
-      return;
-    }
-
-    const nextIdx = localCurrentIndex + 1;
-    if (nextIdx < props.surveyQuestions.length) {
-        const nextQObject = props.surveyQuestions[nextIdx];
-        if (nextQObject && nextQObject.id) {
-             currentQuestion.value = nextQObject;
-             questionPath.value.push(nextQObject.id);
-             freeTextAnswer.value = "";
-             multipleChoiceSelections.value = [];
-             selectedCommune.value = "";
-             postalCodePrefix.value = ""; 
-             stationInput.value = "";
-             streetInput.value = "";
-             selectedGareName.value = "";
-        } else {
-            console.error("Next question by index is invalid or missing ID.");
-            await finishSurvey();
-        }
-    } else {
-        await finishSurvey();
-    }
 };
 
 const nextQuestion = async (selectedOption = null) => {
@@ -1094,24 +1067,43 @@ const evaluateCondition = (conditionString) => {
 </script>
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
+  /* Prevent iOS bounce scrolling and improve mobile behavior */
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  background-color: #2a3b63; /* Ensure body background matches */
+}
+
+html, body {
+  /* Ensure proper height handling on mobile */
+  height: 100%;
+  position: relative;
+  background-color: #2a3b63; /* Ensure body has the same background */
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  min-height: 100vh; /* Use viewport height instead of 100% */
+  min-height: -webkit-fill-available; /* For mobile Safari */
   width: 100%;
   background-color: #2a3b63;
   color: white;
   padding: 0;
+  /* Prevent scrolling issues on mobile */
+  position: relative;
+  overflow-x: hidden;
 }
 
 .content-container {
-  flex-grow: 1;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1120,6 +1112,16 @@ body {
   max-width: 700px;
   margin: 0 auto;
   box-sizing: border-box;
+  /* Prevent content jumping */
+  position: relative;
+  background-color: #2a3b63; /* Ensure content container also has background */
+}
+
+/* Add a fallback for very short content */
+.content-container::after {
+  content: '';
+  flex: 1;
+  background-color: #2a3b63;
 }
 
 .question-container {
@@ -1128,6 +1130,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* Prevent layout shifts */
+  position: relative;
 }
 
 .question-container > h2 {
@@ -1172,6 +1176,26 @@ body {
   font-size: 16px;
   margin-bottom: 15px;
   text-align: center; /* Center align text and placeholder */
+  /* Prevent zoom on iOS */
+  font-size: 16px;
+  -webkit-appearance: none;
+  -webkit-border-radius: 5px;
+}
+
+/* Prevent iOS zoom on input focus */
+@media screen and (max-width: 768px) {
+  .form-control {
+    font-size: 16px !important;
+    transform: translateZ(0);
+  }
+  
+  /* Improve touch targets on mobile */
+  .btn-next,
+  .btn-return,
+  .btn-option,
+  .checkbox-label {
+    min-height: 44px; /* iOS recommended touch target size */
+  }
 }
 
 .btn-next,
@@ -1188,6 +1212,9 @@ body {
   cursor: pointer;
   font-size: 16px;
   text-align: center; /* Ensure text is centered */
+  /* Improve mobile touch */
+  -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+  touch-action: manipulation;
 }
 
 .btn-next {
@@ -1227,6 +1254,9 @@ body {
   width: 100%;
   min-height: 50px; /* Ensure consistent height */
   box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
+  /* Improve mobile touch */
+  -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+  touch-action: manipulation;
 }
 
 .checkbox-label:hover {
@@ -1291,6 +1321,34 @@ body {
 @media screen and (max-width: 480px) {
   .form-control, .btn-next, .btn-return, .btn-option, .checkbox-option {
     max-width: 90%; 
+  }
+  
+  /* Reduce padding on mobile for better space usage */
+  .content-container {
+    padding: 15px;
+  }
+  
+  /* Ensure proper spacing on small screens */
+  .question-container {
+    margin-bottom: 20px;
+  }
+  
+  /* Mobile-specific height fixes */
+  .app-container {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    height: 100%;
+  }
+  
+  /* Ensure body fills viewport on mobile */
+  body {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+  
+  html {
+    height: 100vh;
+    height: -webkit-fill-available;
   }
 }
 
@@ -1393,6 +1451,9 @@ body {
   align-items: center;
   text-align: center;
   width: 100%;
+  /* Prevent content jumping when transitioning */
+  min-height: 200px;
+  justify-content: center;
 }
 
 .start-survey-container h2 {
@@ -1410,6 +1471,9 @@ body {
   text-align: center;
   width: 100%;
   margin-top: 20px; /* Add some space at the top */
+  /* Prevent content jumping */
+  min-height: 200px;
+  justify-content: center;
 }
 
 .survey-complete h2 {
