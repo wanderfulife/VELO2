@@ -109,7 +109,7 @@ export const idfMobilitesCycleSurveyQuestions = [
 
     {
         id: "S5",
-        text: "Pour quelles raisons venez-vous à cette gare ?",
+        text: "Pour quelles raisons fréquentez-vous cette gare à vélo ?",
         type: 'multipleChoice',
         condition: "S2 == 1 OR S3 == 1",
         options: [
