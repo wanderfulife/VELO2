@@ -485,7 +485,6 @@ const recordAnswerToState = (questionId, questionText, optionId, optionText, opt
     savedPosteTravailValue.value = optionId;
     savedPosteTravailText.value = optionText;
     savedPosteTravailOptionIndex.value = optionIndex;
-    console.log(`Poste de travail (QID: ${questionId}) saved for session:`, optionText);
   }
 };
 
@@ -510,7 +509,6 @@ const selectAnswer = (selectedOption) => {
     if (!conditionMet && selectedOption.fallbackNext) {
       // Create a new option object with the fallback next
       effectiveOption = { ...selectedOption, next: selectedOption.fallbackNext };
-      console.log(`Option condition not met for "${selectedOption.text}". Using fallback: ${selectedOption.fallbackNext}`);
     }
   }
   
@@ -532,6 +530,28 @@ const handleMultipleChoiceAnswer = () => {
     multipleChoiceSelections.value,
     combinedOptionText
   );
+  
+  // Check if any selected option has next_if_selected (for precision questions)
+  const optionWithPrecision = selectedOptionsDetails.find(opt => opt.next_if_selected);
+  
+  if (optionWithPrecision) {
+    // Route to the precision question
+    const precisionQuestionId = optionWithPrecision.next_if_selected;
+    
+    const precisionQuestion = findQuestionById(precisionQuestionId);
+    if (precisionQuestion) {
+      currentQuestion.value = precisionQuestion;
+      questionPath.value.push(precisionQuestion.id);
+      freeTextAnswer.value = "";
+      multipleChoiceSelections.value = [];
+      selectedCommune.value = "";
+      postalCodePrefix.value = "";
+      stationInput.value = "";
+      streetInput.value = "";
+      selectedGareName.value = "";
+      return;
+    }
+  }
   
   nextQuestion(null);
 };
@@ -622,22 +642,14 @@ const advanceToNextByIndexOrEnd = async () => {
 
 const nextQuestion = async (selectedOption = null) => {
   let nextId = getNextQuestionId(currentQuestion.value, selectedOption);
-  console.log("=== NEXT QUESTION DEBUG ===");
-  console.log("Current QID:", currentQuestion.value?.id);
-  console.log("Selected Option:", selectedOption);
-  console.log("Next ID determined:", nextId);
-  console.log("Current answers:", answers.value.question_answers);
-  console.log("===========================");
 
   // NEW: Check if the target question has a condition and skip it if not met
   while (nextId && nextId !== 'end') {
     const nextQObject = findQuestionById(nextId);
     if (nextQObject && nextQObject.condition) {
       const shouldShowQuestion = evaluateCondition(nextQObject.condition);
-      console.log(`Question ${nextId} has condition: ${nextQObject.condition}, should show: ${shouldShowQuestion}`);
       if (!shouldShowQuestion) {
         // Skip this question and find the next one
-        console.log(`Skipping question ${nextId} due to condition: ${nextQObject.condition}`);
         
         let fallbackNextId = null;
         
@@ -647,12 +659,10 @@ const nextQuestion = async (selectedOption = null) => {
           const s3Answer = getAnswerById('S3');
           const usesBike = (s2Answer && s2Answer.optionId === 1) || (s3Answer && s3Answer.optionId === 1);
           fallbackNextId = usesBike ? 'S5' : 'S5bis';
-          console.log(`S4 skipped - routing to ${fallbackNextId} based on bike usage: ${usesBike}`);
         } else {
           // First, try to use the question's fallbackNext property
           if (nextQObject.fallbackNext) {
             fallbackNextId = nextQObject.fallbackNext;
-            console.log(`Using question's fallbackNext: ${fallbackNextId}`);
           } else {
             // Try to get the next question from the skipped question
             fallbackNextId = getNextQuestionId(nextQObject, null);
@@ -662,14 +672,11 @@ const nextQuestion = async (selectedOption = null) => {
               const currentIndex = props.surveyQuestions.findIndex(q => q.id === nextId);
               if (currentIndex !== -1 && currentIndex < props.surveyQuestions.length - 1) {
                 fallbackNextId = props.surveyQuestions[currentIndex + 1].id;
-                console.log(`Using sequential fallback: ${fallbackNextId}`);
               } else {
                 // Final safety fallback - go to S13 if we're not already there
                 if (nextId !== 'S13') {
-                  console.log(`Using final safety fallback: S13`);
                   fallbackNextId = 'S13';
                 } else {
-                  console.log(`No sequential fallback available, ending survey`);
                   fallbackNextId = 'end';
                 }
               }
@@ -678,7 +685,6 @@ const nextQuestion = async (selectedOption = null) => {
         }
         
         nextId = fallbackNextId;
-        console.log(`After skipping, new nextId: ${nextId}`);
         continue;
       }
     }
@@ -686,12 +692,10 @@ const nextQuestion = async (selectedOption = null) => {
   }
 
   if (nextId === 'end') {
-    console.log("Survey ending normally - nextId is 'end'");
     await finishSurvey();
   } else if (nextId) {
     const nextQObject = findQuestionById(nextId);
     if (nextQObject) {
-      console.log(`Moving to next question: ${nextId}`);
       currentQuestion.value = nextQObject;
       questionPath.value.push(nextQObject.id);
       freeTextAnswer.value = "";
@@ -702,26 +706,13 @@ const nextQuestion = async (selectedOption = null) => {
       streetInput.value = "";
       selectedGareName.value = "";
       currentQuestionIndex.value = props.surveyQuestions.findIndex(q => q.id === nextQObject.id);
-
     } else {
-      console.error(`CRITICAL ERROR: Next question with ID '${nextId}' not found. Current survey questions:`, props.surveyQuestions.map(q=>q.id));
-      console.error("This should not happen - ending survey as fallback");
+      console.error(`CRITICAL ERROR: Next question with ID '${nextId}' not found.`);
       await finishSurvey();
     }
   } else {
-    console.error("CRITICAL ERROR: No next question ID could be determined from getNextQuestionId.");
-    console.error("Current Question:", currentQuestion.value?.id);
-    console.error("Selected Option:", selectedOption);
-    console.error("This is causing the unexpected survey ending!");
-    
-    const localCurrentIndex = props.surveyQuestions.findIndex(q => q.id === currentQuestion.value?.id);
-    if (localCurrentIndex !== -1 && localCurrentIndex === props.surveyQuestions.length - 1) {
-        console.log("Interpreting as end of survey because no next ID and current is last.");
-        await finishSurvey();
-    } else {
-        console.error("Stuck on question:", currentQuestion.value?.id, "No clear next step. Survey logic might be incomplete. Ending survey to prevent loop.");
-        await finishSurvey();
-    }
+    console.error("CRITICAL ERROR: No next question ID could be determined.");
+    await finishSurvey();
   }
 };
 
@@ -760,7 +751,6 @@ const finishSurvey = async () => {
     // First try to get from savedPosteTravailValue (session memory)
     if (props.posteTravailQuestionId && savedPosteTravailValue.value !== null) {
       capturedPosteTravail = savedPosteTravailValue.value;
-      console.log("POSTE_TRAVAIL captured from session:", capturedPosteTravail);
     }
     
     // If not found in session, try to get from current answers
@@ -770,14 +760,12 @@ const finishSurvey = async () => {
       );
       if (posteAnswerObj) {
         capturedPosteTravail = posteAnswerObj.optionId;
-        console.log("POSTE_TRAVAIL captured from answers:", capturedPosteTravail);
       }
     }
     
     // If still not found, try direct property access
     if (!capturedPosteTravail && props.posteTravailQuestionId && capturedAnswersData[props.posteTravailQuestionId]) {
       capturedPosteTravail = capturedAnswersData[props.posteTravailQuestionId];
-      console.log("POSTE_TRAVAIL captured from direct access:", capturedPosteTravail);
     }
 
     isSurveyComplete.value = true;
@@ -789,46 +777,31 @@ const finishSurvey = async () => {
       firebase_timestamp: new Date().toISOString(),
       HEURE_DEBUT: capturedStartDate || "",
       DATE: now.toLocaleDateString("fr-FR").replace(/\//g, "-"),
-      JOUR: ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Sבת",][now.getDay()],
+      JOUR: ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi",][now.getDay()],
       HEURE_FIN: now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
       ENQUETEUR: capturedEnqueteur,
     };
     
-    if (capturedPosteTravail) {
+    // Add POSTE_TRAVAIL if available
+    if (capturedPosteTravail !== null) {
       surveyResult.POSTE_TRAVAIL = capturedPosteTravail;
     }
 
-    if (capturedAnswersData.question_answers && capturedAnswersData.question_answers.length > 0) {
-      // Sort answers by their position in the original survey questions array
-      const sortedAnswers = capturedAnswersData.question_answers.sort((a, b) => {
-        const indexA = props.surveyQuestions.findIndex(q => String(q.id) === String(a.questionId));
-        const indexB = props.surveyQuestions.findIndex(q => String(q.id) === String(b.questionId));
-        
-        // If question not found in survey, put it at the end
-        if (indexA === -1) return 1;
-        if (indexB === -1) return -1;
-        
+    // Sort answers by their position in the original surveyQuestions array
+    const sortedAnswers = capturedAnswersData.question_answers ? 
+      capturedAnswersData.question_answers.sort((a, b) => {
+        const indexA = props.surveyQuestions.findIndex(q => q.id === a.questionId);
+        const indexB = props.surveyQuestions.findIndex(q => q.id === b.questionId);
         return indexA - indexB;
-      });
-      
-      sortedAnswers.forEach(qa => {
-        surveyResult[qa.questionId] = qa.optionId; 
-      });
-    }
+      }) : [];
+
+    // Add sorted answers to surveyResult
+    sortedAnswers.forEach(qa => {
+      surveyResult[qa.questionId] = qa.optionId;
+    });
+
+    await addDoc(surveyCollectionRef.value, surveyResult);
     
-    console.log("Saving survey data to Firebase:", surveyResult);
-    const docRef = await addDoc(surveyCollectionRef.value, surveyResult);
-    await setDoc(docRef, { firestore_id: docRef.id }, { merge: true });
-    console.log("Survey saved with Submission ID:", uniqueSurveyInstanceId, "Firestore Doc ID:", docRef.id);
-
-    [
-      "surveyStartDate", 
-      "surveyAnswers", 
-      "surveyCurrentQuestionIndex", 
-      "surveyQuestionPath", 
-      "surveyCurrentStep", 
-    ].forEach(item => sessionStorage.removeItem(item));
-
   } catch (error) {
     console.error("Error saving survey:", error);
   } finally {
@@ -1008,22 +981,15 @@ const getAnswerById = (questionId) => {
 };
 
 const getNextQuestionId = (currentQ, selectedOption = null) => {
-  console.log("=== GET NEXT QUESTION ID DEBUG ===");
-  console.log("Current question:", currentQ?.id);
-  console.log("Selected option:", selectedOption);
-  
   if (!currentQ) {
-    console.log("No current question - returning null");
     return null;
   }
 
   if (selectedOption && selectedOption.next) {
-    console.log(`Using selectedOption.next: ${selectedOption.next}`);
     return selectedOption.next;
   }
 
   if (currentQ.conditionalNext) {
-    console.log("Question has conditionalNext - processing...");
     const conditionalNextBlocks = Array.isArray(currentQ.conditionalNext)
       ? currentQ.conditionalNext
       : [currentQ.conditionalNext];
@@ -1053,7 +1019,6 @@ const getNextQuestionId = (currentQ, selectedOption = null) => {
                       condition2Answer.answer === route2.value
                      ) {
                     if (route2.next === null) continue;
-                    console.log(`Using conditionalNext route2.next: ${route2.next}`);
                     return route2.next;
                   }
                 }
@@ -1061,7 +1026,6 @@ const getNextQuestionId = (currentQ, selectedOption = null) => {
               continue;
             }
             if (route.next === null) continue;
-            console.log(`Using conditionalNext route.next: ${route.next}`);
             return route.next;
           }
         }
@@ -1070,18 +1034,14 @@ const getNextQuestionId = (currentQ, selectedOption = null) => {
   }
 
   if (currentQ.next) {
-    console.log(`Using currentQ.next: ${currentQ.next}`);
     return currentQ.next;
   }
 
   const currentIndex = props.surveyQuestions.findIndex(q => q.id === currentQ.id);
   if (currentIndex === props.surveyQuestions.length - 1 && !currentQ.next && !currentQ.conditionalNext) {
-      console.log("Last question in survey - returning 'end'");
       return 'end';
   }
   
-  console.log("No next question ID could be determined - returning null");
-  console.log("Current question details:", currentQ);
   return null;
 };
 
@@ -1095,15 +1055,9 @@ const evaluateCondition = (conditionString) => {
     // Exclude logical operators AND, OR, NOT
     const questionRefs = conditionString.match(/\b(?!AND|OR|NOT)[A-Z][A-Z0-9_]*\b/g) || [];
     
-    console.log(`Evaluating condition: ${conditionString}`);
-    console.log(`Current answers:`, answers.value.question_answers);
-    console.log(`Question refs found:`, questionRefs);
-    
     for (const questionRef of questionRefs) {
       const answer = getAnswerById(questionRef);
       let value = -1; // Default to -1 for unanswered questions
-      
-      console.log(`Question ${questionRef}:`, answer);
       
       if (answer) {
         // Use the option ID (numeric value) for comparisons
@@ -1118,8 +1072,6 @@ const evaluateCondition = (conditionString) => {
         }
       }
       
-      console.log(`${questionRef} -> ${value}`);
-      
       // Replace the question reference with the actual value
       processedCondition = processedCondition.replace(new RegExp(`\\b${questionRef}\\b`, 'g'), value);
     }
@@ -1131,9 +1083,7 @@ const evaluateCondition = (conditionString) => {
       .replace(/\bNOT\b/g, '!');
     
     // Evaluate the condition
-    console.log(`Final condition: ${processedCondition}`);
     const result = Function(`"use strict"; return (${processedCondition})`)();
-    console.log(`Result: ${result}`);
     return result;
   } catch (error) {
     console.error('Error evaluating condition:', conditionString, error);
@@ -1258,30 +1208,56 @@ body {
 .checkbox-option {
   width: 100%;
   max-width: 400px; 
-  text-align: left;
+  margin-bottom: 12px; /* Add margin between options */
+  display: flex;
+  justify-content: center; /* Center the option */
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
+  justify-content: flex-start; /* Align content to start within the label */
   color: white;
   font-size: 16px;
   cursor: pointer;
-  padding: 15px;
+  padding: 12px 20px; /* Reduced padding, more horizontal space */
   background-color: #4a5a83; 
-  border-radius: 5px;
-  transition: background-color 0.2s;
+  border-radius: 8px; /* Slightly more rounded */
+  transition: all 0.2s ease; /* Smooth transition for all properties */
+  width: 100%;
+  min-height: 50px; /* Ensure consistent height */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
 }
 
 .checkbox-label:hover {
   background-color: #5a6a93; 
+  transform: translateY(-1px); /* Slight lift on hover */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15); /* Enhanced shadow on hover */
 }
 
 .checkbox-input {
   margin-right: 15px; 
-  width: 18px;
-  height: 18px;
+  width: 20px; /* Slightly larger checkbox */
+  height: 20px;
   cursor: pointer;
+  flex-shrink: 0; /* Prevent checkbox from shrinking */
+}
+
+/* Ensure the multiple choice container is properly centered */
+.question-container > div[v-else-if*="multipleChoice"] {
+  width: 100%;
+  max-width: 450px; /* Slightly wider for better proportion */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0; /* Remove gap, use margin on individual items instead */
+  margin-bottom: 25px; /* More space before the next button */
+}
+
+/* Style the button container for multiple choice */
+.question-container > div[v-else-if*="multipleChoice"] > button {
+  margin-top: 20px; /* More space above the button */
+  max-width: 400px; /* Match the options width */
 }
 
 .btn-pdf { 

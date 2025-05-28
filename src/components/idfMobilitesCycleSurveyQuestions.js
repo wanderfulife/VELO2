@@ -65,8 +65,8 @@ export const idfMobilitesCycleSurveyQuestions = [
             { id: 5, text: "En métro", next: "S3" },
             { id: 6, text: "En tramway", next: "S3" },
             { id: 7, text: "En bus", next: "S3" },
-            { id: 8, text: "A pied", next: "S3" },
-            { id: 9, text: "Autrement", next: "S3" }
+            { id: 8, text: "A pied", next: "end" },
+            { id: 9, text: "Autrement", next: "end" }
         ]
     },
 
@@ -92,7 +92,7 @@ export const idfMobilitesCycleSurveyQuestions = [
         id: "S4",
         text: "Avez-vous emporté votre vélo dans les transports en commun ou prévoyez-vous de le faire sur ce trajet ?",
         type: 'singleChoice',
-        condition: "VELO == 1 AND (S2 == 3 OR S2 == 4 OR S2 == 5 OR S2 == 6 OR S3 == 3 OR S3 == 4 OR S3 == 5 OR S3 == 6)",
+        condition: "VELO == 1 AND ((S2 >= 2 AND S2 <= 7) OR (S3 >= 2 AND S3 <= 7))",
         options: [
             { id: 1, text: "Oui", next: "S5" },
             { id: 2, text: "Non", next: "S5" }
@@ -129,45 +129,46 @@ export const idfMobilitesCycleSurveyQuestions = [
     },
     {
         id: "S5_PRECISION",
-        text: "Pour un autre motif (S5), précisez :",
+        text: "Pour un autre motif, précisez :",
         type: 'freeText',
         next: "S6"
     },
 
     {
         id: "S6",
-        text: "Quels autres modes de transport utilisez-vous habituellement pour vous rendre à cette gare ?",
-        type: 'multipleChoice',
+        text: "En général, combien de temps stationnez-vous votre vélo à cette gare ?",
+        type: 'singleChoice',
         condition: "(S2 == 1 OR S3 == 1) AND (S4 == 2 OR VELO == 3)",
         options: [
-            { id: 1, text: "La marche à pied" },
-            { id: 2, text: "Une trottinette ou un autre engin de déplacement personnel similaire" },
-            { id: 3, text: "Les transports collectifs / les transports en commun" },
-            { id: 4, text: "Une voiture personnelle" },
-            { id: 5, text: "Le covoiturage" },
-            { id: 6, text: "Un deux-roues motorisé" },
-            { id: 7, text: "Un autre mode", next_if_selected: "S6_PRECISION" }
+            { id: 1, text: "Toute la journée" },
+            { id: 2, text: "Quelques heures (4 heures max), plutôt le matin" },
+            { id: 3, text: "Quelques heures (4 heures max), plutôt l'après-midi" },
+            { id: 4, text: "En soirée" },
+            { id: 5, text: "Toute la nuit" },
+            { id: 6, text: "Autre", next: "S6_PRECISION" }
         ],
         next: "S7",
         fallbackNext: "S7"
     },
     {
         id: "S6_PRECISION",
-        text: "Autre mode (S6), précisez :",
+        text: "Autre durée de stationnement, précisez :",
         type: 'freeText',
         next: "S7"
     },
 
     {
         id: "S7",
-        text: "Où stationnez-vous votre vélo à cette gare ?",
-        type: 'multipleChoice',
+        text: "A quelle fréquence utilisez-vous votre vélo pour vous rendre en gare ?",
+        type: 'singleChoice',
         condition: "S2 == 1 OR S3 == 1",
         options: [
-            { id: 1, text: "Sur des arceaux en libre accès" },
-            { id: 2, text: "Dans une consigne fermée" },
-            { id: 3, text: "Attaché à un élément urbain (poteau, barrière, etc.)" },
-            { id: 4, text: "Autre", next_if_selected: "S7_PRECISION" }
+            { id: 1, text: "Tous les jours de la semaine (travaillés ou non)" },
+            { id: 2, text: "Tous les jours travaillés" },
+            { id: 3, text: "3 à 4 fois / semaine" },
+            { id: 4, text: "1 à 2 fois / semaine" },
+            { id: 5, text: "1 à 3 fois / mois" },
+            { id: 6, text: "Moins souvent" }
         ],
         next: "S8",
         fallbackNext: "S5bis"
@@ -204,7 +205,7 @@ export const idfMobilitesCycleSurveyQuestions = [
     },
     {
         id: "S8_PRECISION",
-        text: "Autre mode (S8), précisez :",
+        text: "Autre mode, précisez :",
         type: 'freeText',
         next: "S9"
     },
@@ -254,7 +255,7 @@ export const idfMobilitesCycleSurveyQuestions = [
     },
     {
         id: "S11_PRECISION",
-        text: "Autre raison (S11), précisez :",
+        text: "Autre raison, précisez :",
         type: 'freeText',
         next: "S12"
     },
@@ -277,7 +278,7 @@ export const idfMobilitesCycleSurveyQuestions = [
     },
     {
         id: "S12_PRECISION",
-        text: "Autre difficulté (S12), précisez :",
+        text: "Autre difficulté, précisez :",
         type: 'freeText',
         next: "S13"
     },
@@ -298,7 +299,7 @@ export const idfMobilitesCycleSurveyQuestions = [
     },
     {
         id: "S5bis_PRECISION",
-        text: "Autre motif (S5bis), précisez :",
+        text: "Autre motif, précisez :",
         type: 'freeText',
         next: "S6bis"
     },
