@@ -215,48 +215,60 @@ onMounted(() => {
 }
 
 .btn-signin {
-  background-color: transparent;
-  color: #4a5568;
-  border: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, rgba(45, 55, 72, 0.9) 0%, rgba(26, 32, 44, 0.9) 100%);
+  color: #a0aec0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 300;
-  padding: 4px 8px;
-  border-radius: 0;
-  transition: all 0.3s ease;
+  font-size: 11px;
+  font-weight: 400;
+  padding: 8px 12px;
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   text-transform: lowercase;
-  letter-spacing: 0;
-  box-shadow: none;
-  margin: 0;
-  outline: none;
-  opacity: 0.5;
-  text-decoration: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0.6;
+  z-index: 100;
+  font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .btn-signin:hover {
-  background-color: transparent;
-  color: #718096;
-  opacity: 0.8;
-  text-decoration: none;
-  box-shadow: none;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+  color: #e2e8f0;
+  opacity: 1;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.btn-signin:active {
+  transform: translateY(0) scale(1.02);
+  transition: all 0.1s ease;
 }
 
 /* Keep the rest of the styles unchanged */
 .btn-download {
-  background-color: #3498db;
+  width: 100%;
+  padding: 12px;
+  background-color: #3b82f6;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 16px;
   transition: background-color 0.3s;
-  width: 100%;
-  margin-top: 20px;
+  margin-top: 10px;
+  box-shadow: none;
 }
 
 .btn-download:hover {
-  background-color: #2980b9;
+  background-color: #2563eb;
 }
 
 .modal {
@@ -277,35 +289,85 @@ onMounted(() => {
   color: white;
   padding: 25px;
   border-radius: 15px;
-  width: 90%;
+  width: auto;
+  min-width: 300px;
+  max-width: 600px;
   position: relative;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-  max-height: fit-content;
-  max-width: 500px;
   margin: 0 auto;
 }
 
+/* Override modal-content when it's also admin-dashboard */
+.modal-content.admin-dashboard {
+  padding: 10px !important; /* Force smaller padding */
+  min-width: 400px !important;
+  max-width: 450px !important;
+  height: auto !important; /* Force auto height */
+  min-height: auto !important; /* Force auto min height */
+}
+
+.modal-content.admin-dashboard h2 {
+  margin: 0 0 8px 0 !important; /* Force smaller margin */
+  font-size: 16px !important; /* Force smaller title */
+}
+
+.modal-content.admin-dashboard .dashboard-content {
+  gap: 4px !important; /* Force tiny gap */
+  margin-bottom: 4px !important; /* Force tiny margin */
+}
+
+.modal-content.admin-dashboard .dashboard-card {
+  padding: 6px !important; /* Force tiny padding */
+  margin: 0 !important; /* Force no margin */
+}
+
+.modal-content.admin-dashboard .dashboard-card h3 {
+  margin: 0 0 2px 0 !important; /* Force tiny margin */
+  font-size: 12px !important; /* Force smaller font */
+}
+
+.modal-content.admin-dashboard .big-number {
+  font-size: 20px !important; /* Force smaller number */
+  margin: 0 !important; /* Force no margin */
+}
+
+.modal-content.admin-dashboard .btn-download {
+  margin-top: 4px !important; /* Force tiny margin */
+  padding: 8px !important; /* Force tiny padding */
+  font-size: 12px !important; /* Force tiny font */
+}
+
+/* Force signin modal to be compact */
+.modal-content.signin-modal {
+  padding: 15px !important;
+  width: auto !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+  height: auto !important;
+  min-height: auto !important;
+}
+
 .signin-modal {
-  max-width: 320px;
-  padding: 20px;
+  max-width: 280px !important; /* Force smaller width */
+  padding: 0 !important; /* Remove all padding since modal-content has it */
 }
 
 .signin-modal h2 {
-  margin: 0 0 20px 0;
-  font-size: 20px;
+  margin: 0 0 10px 0 !important; /* Force tiny margin */
+  font-size: 16px !important; /* Force smaller title */
   text-align: center;
   font-weight: normal;
 }
 
 .signin-modal .form-control {
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 8px !important; /* Force tiny margin */
   background-color: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
-  padding: 12px;
+  padding: 8px !important; /* Force tiny padding */
   font-size: 14px;
-  border-radius: 8px;
+  border-radius: 6px !important; /* Smaller radius */
   box-sizing: border-box;
 }
 
@@ -315,21 +377,26 @@ onMounted(() => {
 
 .signin-modal .btn-signin {
   width: 100%;
-  margin: 0;
-  padding: 12px;
-  background-color: #68d391;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: bold;
+  margin: 0 !important;
+  padding: 8px !important; /* Force tiny padding */
+  background: linear-gradient(135deg, #68d391 0%, #4fd1c7 100%) !important; /* Beautiful gradient */
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important; /* Smaller radius */
+  font-size: 12px !important; /* Force smaller font */
+  font-weight: 600 !important; /* Semi-bold */
   text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease !important;
+  box-sizing: border-box;
+  box-shadow: 0 3px 8px rgba(104, 211, 145, 0.3) !important; /* Smaller shadow */
+  letter-spacing: 0.5px !important; /* Slight letter spacing */
 }
 
 .signin-modal .btn-signin:hover {
-  background-color: #5cb67e;
+  background: linear-gradient(135deg, #4fd1c7 0%, #68d391 100%) !important; /* Reverse gradient on hover */
+  transform: translateY(-2px) !important; /* Lift effect */
+  box-shadow: 0 6px 20px rgba(104, 211, 145, 0.4) !important; /* Enhanced glow */
 }
 
 .close {
@@ -355,15 +422,15 @@ onMounted(() => {
 }
 
 .admin-dashboard {
-  max-width: 800px;
-  max-height: 90vh;
-  padding: 20px 30px;
-  overflow-y: auto;
+  width: auto;
+  min-width: 500px;
+  max-width: 600px;
+  padding: 15px 20px;
 }
 
 .admin-dashboard h2 {
-  margin: 0 0 20px 0;
-  font-size: 24px;
+  margin: 0 0 15px 0;
+  font-size: 20px;
   text-align: center;
   font-weight: normal;
   color: white;
@@ -372,41 +439,41 @@ onMounted(() => {
 .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-  max-height: calc(80vh - 120px);
-  overflow-y: auto;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .dashboard-card {
   background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 15px;
+  border-radius: 8px;
+  padding: 10px;
 }
 
 .dashboard-card h3 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
+  margin: 0 0 4px 0;
+  font-size: 14px;
   color: #3b82f6;
   font-weight: normal;
 }
 
 .dashboard-card.total {
   text-align: center;
-  padding: 12px;
+  padding: 8px;
 }
 
 .big-number {
-  font-size: 42px;
+  font-size: 28px;
   font-weight: bold;
   color: #68d391;
-  margin: 5px 0;
+  margin: 2px 0;
 }
 
 .dashboard-card ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .dashboard-card li {
@@ -425,27 +492,6 @@ onMounted(() => {
 .count {
   font-weight: normal;
   color: #68d391;
-}
-
-.btn-download {
-  position: sticky;
-  bottom: 0;
-  width: 100%;
-  padding: 15px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-top: 20px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.btn-download:hover {
-  background-color: #2563eb;
 }
 
 @media (max-width: 600px) {
